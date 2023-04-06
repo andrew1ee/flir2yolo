@@ -16,32 +16,30 @@ def convert_cat_id(coco):
         6: 4,   # bus
         7: 5,   # train
         8: 6,   # truck
-        10: 7,  # light
-        11: 8,  # hydrant
-        12: 9,  # sign
-        17: 10, # dog
-        18: 11, # deer
-        37: 12, # skateboard
-        73: 13, # stroller
-        75: 14, # scooter
-        79: 15  # other vehicle
+        # 10: 7,  # light
+        # 11: 8,  # hydrant
+        12: 7,  # sign
+        17: 8, # dog
+        18: 9, # deer
+        37: 10, # skateboard
+        73: 11, # stroller
+        75: 12, # scooter
+        79: 13  # other vehicle
     }
     flir = CAT_MAP[coco] 
     return flir
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--path", type=str, help='json file containing annotations')
-    parser.add_argument(
-        "--output_path", type=str, help='Output directory for image.txt files')
-    args = parser.parse_args()
+    base_folder = '../FLIR_ADAS_v2_converted'
+    folders = ['images_rgb_train', 'images_rgb_val', 'images_thermal_train', 'images_thermal_val', 'video_rgb_test', 'video_thermal_test']
 
-    folders = ['train_rgb', 'train_thermal', 'valid_rgb', 'valid_thermal', 'test_rgb', 'test_thermal']
+    omit_categories = [10, 11]
+
     for name in folders:
-        input_json = f'cocos/{name}_coco.json'
-        output_path = f'{name}/labels'
+        input_json = f'{base_folder}/{name}/coco.json'
+        output_path = f'{base_folder}/{name}/labels'
         os.mkdir(output_path)
+        print(f'Converting {name}')
 
         with open(input_json) as f:
             data = json.load(f)
@@ -59,7 +57,7 @@ if __name__ == '__main__':
             converted_results = []
             id = images[i]['id']
             for ann in annotations:
-                if ann['image_id'] == id:
+                if ann['image_id'] == id and int(ann['category_id']) not in omit_categories:
                     cat_id = convert_cat_id(int(ann['category_id']))
                     h, w, f = images[i]['height'], images[i]['width'], images[i]['file_name']
 
